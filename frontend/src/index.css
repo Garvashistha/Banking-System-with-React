@@ -1,13 +1,210 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Modern Dual-Color Banking Design System */
+
+@layer base {
+  :root {
+    /* Clean Light Background */
+    --background: 0 0% 100%;
+    --foreground: 210 24% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 24% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 24% 16%;
+
+    /* Primary: Modern Teal */
+    --primary: 180 84% 40%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 180 84% 35%;
+
+    /* Secondary: Warm Coral Accent */
+    --secondary: 14 100% 95%;
+    --secondary-foreground: 14 100% 30%;
+
+    --muted: 210 14% 96%;
+    --muted-foreground: 210 9% 46%;
+
+    /* Accent: Vibrant Coral */
+    --accent: 14 100% 57%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Banking Specific Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 14% 91%;
+    --input: 210 14% 91%;
+    --ring: 180 84% 40%;
+
+    /* Dual-Color Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(180 84% 40%), hsl(14 100% 57%));
+    --gradient-secondary: linear-gradient(135deg, hsl(14 100% 57%), hsl(180 84% 40%));  
+    --gradient-hero: linear-gradient(135deg, hsl(180 84% 40%), hsl(14 100% 60%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 14% 98%));
+
+    /* Modern Shadows */
+    --shadow-primary: 0 4px 20px -2px hsl(180 84% 40% / 0.25);
+    --shadow-secondary: 0 4px 20px -2px hsl(14 100% 57% / 0.25);
+    --shadow-card: 0 2px 10px -1px hsl(210 14% 91% / 0.4);
+    --shadow-glow: 0 0 30px hsl(180 84% 40% / 0.3);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 210 24% 16%;
+    --sidebar-primary: 180 84% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 14% 96%;
+    --sidebar-accent-foreground: 180 84% 40%;
+    --sidebar-border: 210 14% 91%;
+    --sidebar-ring: 180 84% 40%;
+  }
+
+  .dark {
+    /* Modern Dark Theme */
+    --background: 210 30% 8%;
+    --foreground: 210 14% 96%;
+
+    --card: 210 30% 10%;
+    --card-foreground: 210 14% 96%;
+
+    --popover: 210 30% 10%;
+    --popover-foreground: 210 14% 96%;
+
+    /* Primary: Bright Teal for Dark */
+    --primary: 180 84% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 180 84% 45%;
+
+    /* Secondary: Warm Dark Coral */
+    --secondary: 210 15% 15%;
+    --secondary-foreground: 14 100% 70%;
+
+    --muted: 210 15% 15%;
+    --muted-foreground: 210 9% 60%;
+
+    /* Accent: Bright Coral Dark */
+    --accent: 14 100% 67%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Dark Theme Colors */
+    --success: 142 76% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 60%;
+    --warning-foreground: 210 30% 8%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 20%;
+    --input: 210 15% 15%;
+    --ring: 180 84% 50%;
+
+    /* Dark Dual-Color Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(180 84% 50%), hsl(14 100% 67%));
+    --gradient-secondary: linear-gradient(135deg, hsl(14 100% 67%), hsl(180 84% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(180 84% 50%), hsl(14 100% 70%));
+    --gradient-card: linear-gradient(145deg, hsl(210 30% 10%), hsl(210 15% 12%));
+
+    /* Dark Shadows */
+    --shadow-primary: 0 4px 20px -2px hsl(180 84% 50% / 0.3);
+    --shadow-secondary: 0 4px 20px -2px hsl(14 100% 67% / 0.3);
+    --shadow-card: 0 2px 10px -1px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 30px hsl(180 84% 50% / 0.4);
+
+    --sidebar-background: 210 30% 8%;
+    --sidebar-foreground: 210 14% 96%;
+    --sidebar-primary: 180 84% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 15%;
+    --sidebar-accent-foreground: 210 14% 96%;
+    --sidebar-border: 210 15% 20%;
+    --sidebar-ring: 180 84% 50%;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Dual-Color Gradient Backgrounds */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+
+  /* Modern Shadows */
+  .shadow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+  
+  .shadow-secondary {
+    box-shadow: var(--shadow-secondary);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Banking Animation Classes */
+  .animate-balance {
+    animation: balance-pulse 2s ease-in-out infinite;
+  }
+  
+  .animate-transaction {
+    animation: slide-up 0.3s ease-out;
+  }
+  
+  .animate-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .animate-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
