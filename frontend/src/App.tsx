@@ -8,11 +8,15 @@ import { AuthProvider, useAuth } from "./context/auth-context";
 import { MainLayout } from "./components/layout/main-layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Customers from "./pages/Customers";
 import Deposit from "./pages/Deposit";
 import Withdraw from "./pages/Withdraw";
 import Transfer from "./pages/Transfer";
 import TransactionHistory from "./pages/TransactionHistory";
+import SavingsAccount from "./pages/SavingsAccount";
+import CurrentAccount from "./pages/CurrentAccount";
+import ViewBalance from "./pages/ViewBalance";
+import ViewProfile from "./pages/ViewProfile";
+import UpdateProfile from "./pages/UpdateProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,11 +89,15 @@ const App = () => (
               }>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="customers" element={<Customers />} />
+                <Route path="accounts/savings" element={<SavingsAccount />} />
+                <Route path="accounts/current" element={<CurrentAccount />} />
+                <Route path="accounts/balance" element={<ViewBalance />} />
                 <Route path="deposit" element={<Deposit />} />
                 <Route path="withdraw" element={<Withdraw />} />
                 <Route path="transfer" element={<Transfer />} />
                 <Route path="history" element={<TransactionHistory />} />
+                <Route path="profile/view" element={<ViewProfile />} />
+                <Route path="profile/update" element={<UpdateProfile />} />
               </Route>
 
               {/* Catch all route */}
