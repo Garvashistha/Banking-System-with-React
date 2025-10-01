@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -7,11 +7,13 @@ import {
   ArrowDownRight, 
   ArrowRightLeft,
   History,
-  Building2
+  Building2,
+  LogOut
 } from 'lucide-react';
-import { cn } from "../../lib/utils";
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/context/auth-context';
 
 interface SidebarProps {
   className?: string;
@@ -25,28 +27,48 @@ const navigation = [
     description: 'Account overview'
   },
   {
-    name: 'Customers',
-    href: '/customers',
-    icon: Users,
-    description: 'Manage customers'
+    name: 'Accounts',
+    href: '#',
+    icon: Building2,
+    description: 'Account management',
+    children: [
+      {
+        name: 'Savings Account',
+        href: '/accounts/savings',
+        icon: Building2,
+        description: 'Savings account details'
+      },
+      {
+        name: 'Current Account',
+        href: '/accounts/current',
+        icon: CreditCard,
+        description: 'Current account details'
+      },
+      {
+        name: 'View Balance',
+        href: '/accounts/balance',
+        icon: ArrowDownRight,
+        description: 'View all balances'
+      },
+    ]
   },
   {
     name: 'Transactions',
     href: '#',
-    icon: CreditCard,
+    icon: ArrowRightLeft,
     description: 'Banking operations',
     children: [
-      {
-        name: 'Deposit',
-        href: '/deposit',
-        icon: ArrowDownRight,
-        description: 'Add funds'
-      },
       {
         name: 'Withdraw',
         href: '/withdraw',
         icon: ArrowUpRight,
         description: 'Withdraw funds'
+      },
+      {
+        name: 'Deposit',
+        href: '/deposit',
+        icon: ArrowDownRight,
+        description: 'Add funds'
       },
       {
         name: 'Transfer',
@@ -62,10 +84,37 @@ const navigation = [
     icon: History,
     description: 'Transaction history'
   },
+  {
+    name: 'Profile',
+    href: '#',
+    icon: Users,
+    description: 'Profile management',
+    children: [
+      {
+        name: 'View Profile',
+        href: '/profile/view',
+        icon: Users,
+        description: 'View your profile'
+      },
+      {
+        name: 'Update Profile',
+        href: '/profile/update',
+        icon: Users,
+        description: 'Update profile info'
+      },
+    ]
+  },
 ];
 
 export function Sidebar({ className }: SidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className={cn('pb-12 w-64', className)}>
@@ -78,7 +127,7 @@ export function Sidebar({ className }: SidebarProps) {
             <span className="text-lg font-semibold">SecureBank</span>
           </div>
           
-          <ScrollArea className="h-[calc(100vh-8rem)]">
+          <ScrollArea className="h-[calc(100vh-12rem)]">
             <div className="space-y-1">
               {navigation.map((item) => (
                 <div key={item.name}>
@@ -130,6 +179,18 @@ export function Sidebar({ className }: SidebarProps) {
               ))}
             </div>
           </ScrollArea>
+          
+          {/* Logout Button */}
+          <div className="pt-4 mt-4 border-t">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-3" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>
