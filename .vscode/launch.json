@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "BankingSystemApplication",
+      "request": "launch",
+      "mainClass": "BankingSystemApplication",
+      "projectName": "BankingSystemProject"
+    },
+    {
+      "type": "java",
+      "name": "Launch BankingSystemApplication",
+      "request": "launch",
+      "mainClass": "org.bank.BankingSystemApplication",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend",
+      "classPaths": [
+        "${workspaceFolder}/backend/target/classes"
+      ]
+    }
+  ]
+}
