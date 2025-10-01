@@ -1,35 +1,41 @@
-package com.bank.api;
+package com.org.bank.api;
 
-import com.yourbank.service.TransactionService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
-import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class TransactionApiController {
 
-    private final TransactionService transactionService;
+    @PostMapping("/deposit")
+    public ResponseEntity<?> deposit(@RequestBody Map<String, Object> body) {
+        double amount = (double) body.get("amount");
+        return ResponseEntity.ok(Map.of("message", "Deposited " + amount));
+    }
 
-    public TransactionApiController(TransactionService transactionService) {
-        this.transactionService = transactionService;
+    @PostMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestBody Map<String, Object> body) {
+        double amount = (double) body.get("amount");
+        return ResponseEntity.ok(Map.of("message", "Withdrew " + amount));
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> transfer(@RequestParam String fromAccount,
-                                      @RequestParam String toAccount,
-                                      @RequestParam double amount,
-                                      Principal principal) {
-        transactionService.transfer(fromAccount, toAccount, amount);
-        return ResponseEntity.ok(Map.of("status", "success"));
+    public ResponseEntity<?> transfer(@RequestBody Map<String, Object> body) {
+        String toAccount = (String) body.get("toAccount");
+        double amount = (double) body.get("amount");
+        return ResponseEntity.ok(Map.of("message", "Transferred " + amount + " to " + toAccount));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<?> history(Principal principal) {
-        var list = transactionService.getHistory(principal.getName());
-        return ResponseEntity.ok(list);
+    public ResponseEntity<?> history() {
+        List<Map<String, Object>> history = List.of(
+                Map.of("id", 1, "type", "Deposit", "amount", 5000),
+                Map.of("id", 2, "type", "Withdraw", "amount", 2000),
+                Map.of("id", 3, "type", "Transfer", "amount", 1000)
+        );
+        return ResponseEntity.ok(history);
     }
 }
