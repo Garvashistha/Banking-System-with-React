@@ -1,6 +1,6 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.User;
+import entities.User;
 import java.util.Optional;
 
 public interface UserService {

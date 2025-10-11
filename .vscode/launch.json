@@ -5,6 +5,13 @@
       "type": "java",
       "name": "BankingSystemApplication",
       "request": "launch",
+      "mainClass": "org.bank.BankingSystemApplication",
+      "projectName": "BankingSystemProject"
+    },
+    {
+      "type": "java",
+      "name": "BankingSystemApplication",
+      "request": "launch",
       "mainClass": "BankingSystemApplication",
       "projectName": "BankingSystemProject"
     },

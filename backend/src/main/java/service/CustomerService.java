@@ -1,7 +1,7 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.Customer;
-import org.bank.entities.User;
+import entities.Customer;
+import entities.User;
 
 import java.util.List;
 import java.util.Optional;

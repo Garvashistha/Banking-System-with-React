@@ -1,9 +1,9 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.Account;
-import org.bank.entities.Customer;
-import org.bank.entities.Transaction;
-import org.bank.repository.AccountRepository;
+import entities.Account;
+import entities.Customer;
+import entities.Transaction;
+import repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

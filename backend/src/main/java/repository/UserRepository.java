@@ -1,6 +1,6 @@
-package org.bank.repository;
+package repository;
 
-import org.bank.entities.User;
+import entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

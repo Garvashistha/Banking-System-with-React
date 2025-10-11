@@ -1,7 +1,7 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.Account;
-import org.bank.entities.Customer;
+import entities.Account;
+import entities.Customer;
 
 import java.math.BigDecimal;
 import java.util.List;
