@@ -1,8 +1,8 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.Customer;
-import org.bank.entities.User;
-import org.bank.repository.CustomerRepository;
+import entities.Customer;
+import entities.User;
+import repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

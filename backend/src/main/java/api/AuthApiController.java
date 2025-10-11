@@ -1,4 +1,4 @@
-package com.org.bank.api;
+package api;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;

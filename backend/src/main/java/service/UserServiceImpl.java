@@ -1,7 +1,7 @@
-package org.bank.service;
+package service;
 
-import org.bank.entities.User;
-import org.bank.repository.UserRepository;
+import entities.User;
+import repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

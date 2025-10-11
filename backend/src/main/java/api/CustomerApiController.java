@@ -1,5 +1,5 @@
-package org.bank.api;
-import org.bank.service.CustomerService;
+package api;
+import service.CustomerService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

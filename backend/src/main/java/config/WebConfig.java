@@ -1,4 +1,4 @@
-package com.yourbank.config;
+package config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +14,20 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:5173") // React dev server
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
-                        .allowCredentials(true);
+                        // Frontend URLs allowed to access the backend
+                        .allowedOrigins(
+                                "http://localhost:5173",   // React dev server
+                                "http://127.0.0.1:5173",   // Sometimes vite runs here
+                                "https://mybankapp.com"    // Your production frontend domain
+                        )
+                        // Methods allowed
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        // Allow credentials (cookies, JWT in headers)
+                        .allowCredentials(true)
+                        // Allow all headers (Authorization, Content-Type, etc.)
+                        .allowedHeaders("*")
+                        // Expose headers (optional, useful for JWT tokens, pagination, etc.)
+                        .exposedHeaders("Authorization", "Content-Disposition");
             }
         };
     }

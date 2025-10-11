@@ -1,6 +1,6 @@
-package org.bank.config;
+package config;
 
-import org.bank.service.AuthService;
+import service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

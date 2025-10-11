@@ -1,7 +1,7 @@
-package org.bank.repository;
+package repository;
 
-import org.bank.entities.Account;
-import org.bank.entities.Customer;
+import entities.Account;
+import entities.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

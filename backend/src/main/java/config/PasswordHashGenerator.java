@@ -1,4 +1,4 @@
-package org.bank.config;
+package config;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
