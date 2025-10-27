@@ -45,28 +45,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // allow login/register endpoints
-                .requestMatchers("/api/auth/**", "/", "/public/**").permitAll()
-                // ✅ allow chatbot endpoint (no authentication required)
-                .requestMatchers("/api/chat/**").permitAll()
-                // everything else still requires login
-                .anyRequest().authenticated()
-            )
-            // Add JWT filter before UsernamePasswordAuthenticationFilter
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            // ✅ allow both with and without /api prefix to be safe
+            .requestMatchers("/auth/**", "/api/auth/**", "/", "/public/**").permitAll()
+            // ✅ allow chatbot endpoint
+            .requestMatchers("/api/chat/**").permitAll()
+            // everything else requires login
+            .anyRequest().authenticated()
+        )
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
-        return http.build();
-    }
+    return http.build();
+}
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
