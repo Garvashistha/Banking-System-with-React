@@ -79,7 +79,7 @@ public class SecurityConfig {
             "http://localhost:3000",
             "http://127.0.0.1:3000", 
             "https://banksystem.zeabur.app", 
-            "https://banking-system-with-react-7eyy.vercel.app\r\n"
+            "https://banking-system-with-react-7eyy.vercel.app"
         ));
         // config.addAllowedOriginPattern("http://localhost:*");
         // config.addAllowedOriginPattern("http://127.0.0.1:*");
