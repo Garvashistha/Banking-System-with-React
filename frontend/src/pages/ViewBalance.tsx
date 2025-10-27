@@ -29,9 +29,9 @@ export default function ViewBalance() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
     }).format(amount);
   };
 
@@ -135,7 +135,7 @@ export default function ViewBalance() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary">$1,000 Overdraft</Badge>
+              <Badge variant="secondary">₹1,000 Overdraft</Badge>
               <Badge variant="outline">Active</Badge>
             </div>
           </CardContent>

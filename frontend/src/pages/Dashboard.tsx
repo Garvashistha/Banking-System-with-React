@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { 
   DollarSign, 
   ArrowUpRight, 
@@ -9,7 +14,8 @@ import {
   ArrowRightLeft,
   TrendingUp,
   Eye,
-  EyeOff
+  EyeOff,
+  PlusCircle
 } from 'lucide-react';
 import { useAuth } from '../context/auth-context';
 import { dashboardApi } from '../lib/api';
@@ -20,9 +26,14 @@ import { useNavigate } from 'react-router-dom';
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
+  const [openAccountModal, setOpenAccountModal] = useState(false);
+  const [accountType, setAccountType] = useState<string>('SAVINGS');
+  const [initialDeposit, setInitialDeposit] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -74,10 +85,67 @@ export default function Dashboard() {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
     }).format(amount);
+  };
+
+  const handleOpenAccount = async () => {
+    if (!initialDeposit || parseFloat(initialDeposit) <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid initial deposit amount",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch('http://localhost:8080/api/accounts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          type: accountType,
+          initialDeposit: parseFloat(initialDeposit)
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Account created successfully!",
+        });
+        setOpenAccountModal(false);
+        setAccountType('SAVINGS');
+        setInitialDeposit('');
+        
+        // Refresh dashboard data
+        const dashboardResponse = await dashboardApi.getDashboardData();
+        if (dashboardResponse.success && dashboardResponse.data) {
+          setDashboardData(dashboardResponse.data);
+        }
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create account",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create account. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -147,6 +215,63 @@ export default function Dashboard() {
           <p className="text-muted-foreground">Here's an overview of your account</p>
         </div>
         <div className="flex items-center space-x-2">
+          <Dialog open={openAccountModal} onOpenChange={setOpenAccountModal}>
+            <DialogTrigger asChild>
+              <Button variant="default" className="bg-gradient-primary">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Open Account
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Open New Account</DialogTitle>
+                <DialogDescription>
+                  Create a new savings or current account
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="accountType">Account Type</Label>
+                  <Select value={accountType} onValueChange={setAccountType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select account type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SAVINGS">Savings</SelectItem>
+                      <SelectItem value="CURRENT">Current</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="initialDeposit">Initial Deposit (₹)</Label>
+                  <Input
+                    id="initialDeposit"
+                    type="number"
+                    placeholder="5000"
+                    value={initialDeposit}
+                    onChange={(e) => setInitialDeposit(e.target.value)}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setOpenAccountModal(false)}
+                    disabled={submitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleOpenAccount}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Creating...' : 'Create Account'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button onClick={() => navigate('/deposit')} className="bg-gradient-success">
             <ArrowDownRight className="mr-2 h-4 w-4" />
             Deposit

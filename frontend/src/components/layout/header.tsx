@@ -22,14 +22,21 @@ export function Header() {
     navigate('/login');
   };
 
-  const getUserInitials = (name: string) => {
+  // ✅ Safe version: Handles undefined names gracefully
+  const getUserInitials = (name?: string) => {
+    if (!name || typeof name !== 'string') return '?';
     return name
+      .trim()
       .split(' ')
-      .map(n => n[0])
+      .map(n => n[0]?.toUpperCase() ?? '')
       .join('')
-      .toUpperCase()
       .slice(0, 2);
   };
+
+  // ✅ Determine display name safely
+  const displayName = user?.fullName || user?.username || 'Guest';
+  const displayEmail = user?.email || 'No email available';
+  const initials = getUserInitials(displayName);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,14 +52,14 @@ export function Header() {
         {/* Right side */}
         <div className="flex items-center space-x-4">
           <ThemeToggle />
-          
+
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gradient-primary text-white text-sm">
-                      {getUserInitials(user.fullName)}
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -60,9 +67,9 @@ export function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.fullName}</p>
+                    <p className="text-sm font-medium leading-none">{displayName}</p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
+                      {displayEmail}
                     </p>
                   </div>
                 </DropdownMenuLabel>

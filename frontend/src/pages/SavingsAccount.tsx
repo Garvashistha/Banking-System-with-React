@@ -29,9 +29,9 @@ export default function SavingsAccount() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
     }).format(amount);
   };
 
@@ -68,7 +68,7 @@ export default function SavingsAccount() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {accountData ? formatCurrency(accountData.balance) : '$0.00'}
+              {accountData ? formatCurrency(accountData.balance) : '₹0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
               Savings Account
@@ -140,7 +140,6 @@ export default function SavingsAccount() {
           Withdraw Funds <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-      
     </div>
   );
 }

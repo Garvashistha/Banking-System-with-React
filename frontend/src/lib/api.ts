@@ -1,169 +1,158 @@
-import { User, LoginCredentials, RegisterData } from '../types/auth';
-import { Customer, CustomerFormData } from '../types/customer';
-import { Transaction } from '../types/transaction';
-import { DashboardData } from '../types/dashboard';
+// src/lib/api.ts
+// -----------------------------------------------------------
+// Universal API helper for the React frontend
+// - Uses import.meta.env.VITE_API_URL or defaults to http://localhost:8080
+// - Handles JSON automatically and includes JWT token if present
+// - Groups requests under authApi, customerApi, dashboardApi, transactionApi
+// -----------------------------------------------------------
 
-// Base URL for backend API (defined in .env file)
-// Example: VITE_API_URL=http://localhost:8080/api
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+export const API_BASE_URL =
+  (import.meta.env.VITE_API_URL as string) || "http://localhost:8080";
 
-// ------------------------------------------------------------
-// Generic API request helper
-// ------------------------------------------------------------
-const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const config: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    credentials: 'include', // allow session cookie from Spring Security
-    ...options,
+/**
+ * Generic API request helper.
+ * Automatically stringifies objects, adds token, and handles errors.
+ */
+async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
+  const token = localStorage.getItem("banking-token");
+
+  const defaultHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
   };
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-    if (response.status === 204) {
-      return { success: true };
-    }
-
-    const contentType = response.headers.get('content-type');
-    let data;
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = await response.text();
-    }
-
-    if (!response.ok) {
-      throw new Error((data as any).message || data || 'API request failed');
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error(`API Error (${endpoint}):`, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Network error',
-    };
+  // ✅ Include JWT in Authorization header if available
+  if (token) {
+    defaultHeaders["Authorization"] = `Bearer ${token}`;
   }
-};
 
-// ------------------------------------------------------------
-// Authentication API  (Spring Security session)
-// ------------------------------------------------------------
-export const authApi = {
-  login: async (credentials: LoginCredentials) => {
-    // ✅ Backend endpoint: POST /api/auth/login-success
-    const result = await apiRequest('/auth/login-success', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+  const config: RequestInit = {
+    method: options.method ?? "GET",
+    headers: {
+      ...defaultHeaders,
+      ...(options.headers || {}),
+    },
+    credentials: "include",
+  };
 
-    if (result.success) {
-      return {
-        success: true,
-        user: result.data?.user || {
-          id: 1,
-          username: credentials.username,
-          email: `${credentials.username}@example.com`,
-          fullName: credentials.username,
-          roles: ['USER'],
-        },
-      };
+  // handle body
+  if (options.body !== undefined && options.body !== null) {
+    if (typeof FormData !== "undefined" && options.body instanceof FormData) {
+      (config as any).body = options.body;
+      delete (config.headers as Record<string, string>)["Content-Type"];
+    } else if (typeof options.body === "string") {
+      (config as any).body = options.body;
+    } else {
+      (config as any).body = JSON.stringify(options.body);
     }
-    return result;
+  }
+
+  // merge extra fetch options
+  const leftover = { ...options };
+  delete leftover.body;
+  delete leftover.method;
+  delete leftover.headers;
+  Object.assign(config, leftover);
+
+  // Ensure only one "/api" prefix total
+  const url =
+    API_BASE_URL + (endpoint.startsWith("/") ? endpoint : `/${endpoint}`);
+
+  const res = await fetch(url, config);
+  const text = await res.text();
+  let payload: any = text;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    // not JSON, keep as text
+  }
+
+  if (!res.ok) {
+    const error: any = new Error(
+      payload?.error || payload?.message || `HTTP ${res.status}`
+    );
+    error.status = res.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  return payload;
+}
+
+// -----------------------------------------------------------
+// AUTH API
+// -----------------------------------------------------------
+export const authApi = {
+  login: async (data: { username: string; password: string }) =>
+    apiRequest("/api/auth/login", { method: "POST", body: data }),
+
+  logout: async () => apiRequest("/api/auth/logout", { method: "POST" }),
+
+  register: async (data: {
+    username: string;
+    password: string;
+    email?: string;
+    fullName?: string;
+  }) => apiRequest("/api/auth/register", { method: "POST", body: data }),
+
+  // ✅ Updated to send Authorization header with token
+  validateToken: async () => {
+    const token = localStorage.getItem("banking-token");
+    if (!token) throw new Error("No JWT token found");
+    return apiRequest("/api/auth/validate-token", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   },
-
-  register: async (userData: RegisterData) =>
-    // ✅ Backend endpoint: POST /api/auth/register
-    apiRequest('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    }),
-
-  logout: async () =>
-    // ✅ Backend endpoint: POST /api/auth/logout-success
-    apiRequest('/auth/logout-success', { method: 'POST' }),
-
-  validateSession: async () =>
-    // ✅ Backend endpoint: GET /api/auth/validate (if implemented)
-    apiRequest('/auth/validate', { method: 'GET' }),
 };
 
-// ------------------------------------------------------------
-// Customer API
-// ------------------------------------------------------------
+// -----------------------------------------------------------
+// CUSTOMER API
+// -----------------------------------------------------------
 export const customerApi = {
-  // ✅ Backend endpoint: GET /api/customers
-  getAll: async () => apiRequest('/customers'),
-
-  // ✅ Backend endpoint: GET /api/customers/{id}
-  getById: async (id: number) => apiRequest(`/customers/${id}`),
-
-  // ✅ Backend should implement: POST /api/customers
-  create: async (customerData: CustomerFormData) =>
-    apiRequest('/customers', {
-      method: 'POST',
-      body: JSON.stringify(customerData),
-    }),
-
-  // ✅ Backend should implement: PUT /api/customers/{id}
-  update: async (id: number, customerData: CustomerFormData) =>
-    apiRequest(`/customers/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(customerData),
-    }),
-
-  // ✅ Backend should implement: DELETE /api/customers/{id}
-  delete: async (id: number) =>
-    apiRequest(`/customers/${id}`, { method: 'DELETE' }),
+  getAll: async () => apiRequest("/customers"),
+  getOne: async (id: string) => apiRequest(`/customers/${id}`),
+  create: async (data: Record<string, any>) =>
+    apiRequest("/customers/create", { method: "POST", body: data }),
+  update: async (id: string, data: Record<string, any>) =>
+    apiRequest(`/customers/update/${id}`, { method: "PUT", body: data }),
+  delete: async (id: string) =>
+    apiRequest(`/customers/delete/${id}`, { method: "DELETE" }),
 };
 
-// ------------------------------------------------------------
-// Dashboard API
-// ------------------------------------------------------------
+// -----------------------------------------------------------
+// DASHBOARD API
+// -----------------------------------------------------------
 export const dashboardApi = {
-  // ✅ Backend endpoint: GET /api/dashboard/summary
-  getDashboardData: async (): Promise<{
-    success: boolean;
-    data?: DashboardData;
-    error?: string;
-  }> => apiRequest('/dashboard/summary'),
+  getDashboardData: async () => apiRequest("/dashboard"),
 };
 
-// ------------------------------------------------------------
-// Transaction API
-// ------------------------------------------------------------
+// -----------------------------------------------------------
+// TRANSACTION API
+// -----------------------------------------------------------
 export const transactionApi = {
-  // ✅ Backend endpoint: POST /api/transactions/deposit
   deposit: async (data: { accountNumber: string; amount: number }) =>
-    apiRequest('/transactions/deposit', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    apiRequest("/transactions/deposit", { method: "POST", body: data }),
 
-  // ✅ Backend endpoint: POST /api/transactions/withdraw
   withdraw: async (data: { accountNumber: string; amount: number }) =>
-    apiRequest('/transactions/withdraw', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    apiRequest("/transactions/withdraw", { method: "POST", body: data }),
 
-  // ✅ Backend endpoint: POST /api/transactions/transfer
   transfer: async (data: {
     fromAccount: string;
     toAccount: string;
     amount: number;
-  }) =>
-    apiRequest('/transactions/transfer', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  }) => apiRequest("/transactions/transfer", { method: "POST", body: data }),
 
-  // ✅ Backend endpoint: GET /api/transactions/history
-  getHistory: async () => apiRequest('/transactions/history'),
+  getHistory: async () => apiRequest("/transactions/history"),
 };
 
-export default apiRequest;
+// -----------------------------------------------------------
+// Default export (optional convenience)
+// -----------------------------------------------------------
+export default {
+  authApi,
+  customerApi,
+  dashboardApi,
+  transactionApi,
+};

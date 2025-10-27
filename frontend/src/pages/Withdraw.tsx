@@ -38,7 +38,7 @@ export default function Withdraw() {
     }
     
     if (amount > 10000) {
-      setErrors({ amount: 'Maximum withdrawal amount is $10,000' });
+      setErrors({ amount: 'Maximum withdrawal amount is ₹10,000' });
       return;
     }
 
@@ -53,7 +53,7 @@ export default function Withdraw() {
       if (result.success) {
         toast({
           title: "Withdrawal Successful",
-          description: `$${amount.toFixed(2)} has been withdrawn from your account.`,
+          description: `₹${amount.toFixed(2)} has been withdrawn from your account.`,
         });
         navigate('/dashboard');
       } else {
@@ -115,7 +115,7 @@ export default function Withdraw() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($)</Label>
+              <Label htmlFor="amount">Amount (₹)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -164,8 +164,8 @@ export default function Withdraw() {
       <Card className="max-w-md bg-muted/30 border-dashed">
         <CardContent className="pt-6">
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>• Minimum withdrawal: $0.01</p>
-            <p>• Maximum withdrawal: $10,000</p>
+            <p>• Minimum withdrawal: ₹0.01</p>
+            <p>• Maximum withdrawal: ₹10,000</p>
             <p>• Processing time: 1-2 business days</p>
             <p>• No withdrawal fees</p>
           </div>

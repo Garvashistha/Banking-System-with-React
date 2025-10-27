@@ -44,7 +44,7 @@ export default function Transfer() {
     }
     
     if (amount > 25000) {
-      setErrors({ amount: 'Maximum transfer amount is $25,000' });
+      setErrors({ amount: 'Maximum transfer amount is ₹25,000' });
       return;
     }
 
@@ -60,7 +60,7 @@ export default function Transfer() {
       if (result.success) {
         toast({
           title: "Transfer Successful",
-          description: `$${amount.toFixed(2)} has been transferred successfully.`,
+          description: `₹${amount.toFixed(2)} has been transferred successfully.`,
         });
         navigate('/dashboard');
       } else {
@@ -137,7 +137,7 @@ export default function Transfer() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($)</Label>
+              <Label htmlFor="amount">Amount (₹)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -185,8 +185,8 @@ export default function Transfer() {
       <Card className="max-w-md bg-muted/30 border-dashed">
         <CardContent className="pt-6">
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>• Minimum transfer: $0.01</p>
-            <p>• Maximum transfer: $25,000</p>
+            <p>• Minimum transfer: ₹0.01</p>
+            <p>• Maximum transfer: ₹25,000</p>
             <p>• Processing: Immediate</p>
             <p>• No transfer fees</p>
           </div>

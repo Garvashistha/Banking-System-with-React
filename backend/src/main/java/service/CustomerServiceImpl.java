@@ -34,12 +34,6 @@ public class CustomerServiceImpl implements CustomerService {
         return customerRepository.save(customer);
     }
 
-    // ❌ Remove this or implement properly in UserService
-    @Override
-    public User save(User user) {
-        throw new UnsupportedOperationException("Use UserService to save a User");
-    }
-
     @Override
     public void deleteById(Long id) {
         customerRepository.deleteById(id);
@@ -52,6 +46,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Customer findByUserId(Long userId) {
-        return customerRepository.findByUser_Id(userId);
+        return customerRepository.findByUser_Id(userId).orElse(null);
     }
 }

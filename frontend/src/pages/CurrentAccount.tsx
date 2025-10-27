@@ -29,9 +29,9 @@ export default function CurrentAccount() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
     }).format(amount);
   };
 
@@ -68,7 +68,7 @@ export default function CurrentAccount() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {accountData ? formatCurrency(accountData.balance) : '$0.00'}
+              {accountData ? formatCurrency(accountData.balance) : '₹0.00'}
             </div>
             <p className="text-xs text-muted-foreground">
               Current Account
@@ -82,7 +82,7 @@ export default function CurrentAccount() {
             <DollarSign className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$1,000</div>
+            <div className="text-2xl font-bold">₹1,000</div>
             <p className="text-xs text-muted-foreground">
               Available for emergencies
             </p>
@@ -120,7 +120,7 @@ export default function CurrentAccount() {
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div>
               <h3 className="font-medium">Overdraft Protection</h3>
-              <p className="text-sm text-muted-foreground">Up to $1,000 overdraft facility</p>
+              <p className="text-sm text-muted-foreground">Up to ₹1,000 overdraft facility</p>
             </div>
           </div>
           <div className="flex items-center justify-between p-4 border rounded-lg">

@@ -14,13 +14,11 @@ public interface CustomerService {
 
     Customer save(Customer customer);
 
-    User save(User user);
-
     void deleteById(Long id);
 
     // Find customer by User entity
     Optional<Customer> findByUser(User user);
 
-    // 🔹 Add this method to fix "Cannot resolve method 'findByUserId'"
+    // Find customer by User ID
     Customer findByUserId(Long userId);
 }

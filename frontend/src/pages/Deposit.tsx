@@ -37,7 +37,7 @@ export default function Deposit() {
     }
     
     if (amount > 50000) {
-      setErrors({ amount: 'Maximum deposit amount is $50,000' });
+      setErrors({ amount: 'Maximum deposit amount is ₹50,000' });
       return;
     }
 
@@ -52,7 +52,7 @@ export default function Deposit() {
       if (result.success) {
         toast({
           title: "Deposit Successful",
-          description: `$${amount.toFixed(2)} has been deposited to your account.`,
+          description: `₹${amount.toFixed(2)} has been deposited to your account.`,
         });
         navigate('/dashboard');
       } else {
@@ -107,7 +107,7 @@ export default function Deposit() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount ($)</Label>
+              <Label htmlFor="amount">Amount (₹)</Label>
               <Input
                 id="amount"
                 type="number"
@@ -155,8 +155,8 @@ export default function Deposit() {
       <Card className="max-w-md bg-muted/30 border-dashed">
         <CardContent className="pt-6">
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>• Minimum deposit: $0.01</p>
-            <p>• Maximum deposit: $50,000</p>
+            <p>• Minimum deposit: ₹0.01</p>
+            <p>• Maximum deposit: ₹50,000</p>
             <p>• Funds are available immediately</p>
             <p>• No deposit fees</p>
           </div>

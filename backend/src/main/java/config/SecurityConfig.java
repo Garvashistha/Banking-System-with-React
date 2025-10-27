@@ -1,30 +1,36 @@
 package config;
 
-import service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import service.AuthService;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
-    private final AuthService authService;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthService authService;
 
     @Autowired
-    public SecurityConfig(AuthService authService, PasswordEncoder passwordEncoder) {
-        this.authService = authService;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private PasswordEncoder passwordEncoder;
 
-    // DaoAuthenticationProvider using AuthService
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -33,65 +39,59 @@ public class SecurityConfig {
         return provider;
     }
 
-    // Authentication manager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
         return cfg.getAuthenticationManager();
     }
 
-    // Main security filter chain
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                // ✅ Swagger endpoints should be public
-                .requestMatchers(
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**"
-                ).permitAll()
-
-                // ✅ Public endpoints
-                .requestMatchers("/", "/login", "/register", "/register/**",
-                        "/css/**", "/js/**", "/images/**").permitAll()
-
-                // ✅ Role-based endpoints
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/customers/**", "/accounts/**", "/transactions/**", "/dashboard").hasRole("USER")
-
-                // ✅ Everything else requires login
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // allow login/register endpoints
+                .requestMatchers("/api/auth/**", "/", "/public/**").permitAll()
+                // ✅ allow chatbot endpoint (no authentication required)
+                .requestMatchers("/api/chat/**").permitAll()
+                // everything else still requires login
                 .anyRequest().authenticated()
             )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/perform_login")
-                .successHandler(customAuthenticationSuccessHandler())
-                .failureUrl("/login?error")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
-                .permitAll()
-            )
-            .authenticationProvider(authenticationProvider());
+            // Add JWT filter before UsernamePasswordAuthenticationFilter
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable());
 
         return http.build();
     }
 
-    // Role-based redirect
     @Bean
-    public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            var authorities = authentication.getAuthorities();
-            String redirectUrl = "/dashboard"; // default USER redirect
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
 
-            if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                redirectUrl = "/admin/dashboard";
-            }
+        // ✅ Add all possible local origins for dev
+        config.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ));
 
-            response.sendRedirect(redirectUrl);
-        };
+        // ✅ or use wildcards for localhost ports
+        // config.addAllowedOriginPattern("http://localhost:*");
+        // config.addAllowedOriginPattern("http://127.0.0.1:*");
+
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
