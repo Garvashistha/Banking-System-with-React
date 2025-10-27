@@ -146,6 +146,15 @@ export const transactionApi = {
 
   getHistory: async () => apiRequest("/transactions/history"),
 };
+// -----------------------------------------------------------
+// PROFILE API
+// -----------------------------------------------------------
+export const profileApi = {
+  getProfile: async () => apiRequest("/api/profile"),
+  updateProfile: async (data: Record<string, any>) =>
+    apiRequest("/api/profile", { method: "PUT", body: data }),
+};
+
 
 // -----------------------------------------------------------
 // Default export (optional convenience)
@@ -155,4 +164,5 @@ export default {
   customerApi,
   dashboardApi,
   transactionApi,
+  profileApi,
 };
