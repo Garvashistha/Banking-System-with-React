@@ -31,12 +31,35 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User saveUser(User user) {
-        // Always encode password before saving
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // If new user or password changed, encode the password
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         return userRepository.save(user);
     }
 
-    // Spring Security uses this method at login
+    /**
+     * Update only profile-related fields (not username or password unless provided)
+     */
+    public User updateUserProfile(Long userId, User updatedUserData) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+
+        existingUser.setFirstName(updatedUserData.getFirstName());
+        existingUser.setLastName(updatedUserData.getLastName());
+        existingUser.setEmail(updatedUserData.getEmail());
+        existingUser.setPhone(updatedUserData.getPhone());
+        existingUser.setAddress(updatedUserData.getAddress());
+
+        // Only update password if a new one is provided
+        if (updatedUserData.getPassword() != null && !updatedUserData.getPassword().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(updatedUserData.getPassword()));
+        }
+
+        return userRepository.save(existingUser);
+    }
+
+    // Spring Security uses this method during login
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
