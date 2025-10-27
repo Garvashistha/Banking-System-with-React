@@ -18,7 +18,7 @@ import ViewBalance from "./pages/ViewBalance";
 import ViewProfile from "./pages/ViewProfile";
 import UpdateProfile from "./pages/UpdateProfile";
 import NotFound from "./pages/NotFound";
-
+console.log("🌐 API URL =>", import.meta.env.VITE_API_URL);
 const queryClient = new QueryClient();
 
 // Protected Route Component
