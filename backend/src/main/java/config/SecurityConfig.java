@@ -45,50 +45,40 @@ public class SecurityConfig {
     }
 
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .csrf(csrf -> csrf.disable())
-        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            // ✅ allow both with and without /api prefix to be safe
-            .requestMatchers("/auth/**", "/api/auth/**", "/", "/public/**").permitAll()
-            // ✅ allow chatbot endpoint
-            .requestMatchers("/api/chat/**").permitAll()
-            // everything else requires login
-            .anyRequest().authenticated()
-        )
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        .formLogin(form -> form.disable())
-        .httpBasic(basic -> basic.disable());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/", "/auth/**", "/api/auth/**", "/public/**", "/api/chat/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable());
 
-    return http.build();
-}
-
+        return http.build();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // ✅ Add all possible local origins for dev
+        
+        // ✅ Must match your frontend URLs exactly
         config.setAllowedOrigins(List.of(
+            "https://banksystem.zeabur.app",
+            "https://banking-system-with-react-7eyy.vercel.app",
             "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000", 
-            "https://banksystem.zeabur.app", 
-            "https://banking-system-with-react-7eyy.vercel.app"
+            "http://127.0.0.1:5173"
         ));
-        // config.addAllowedOriginPattern("http://localhost:*");
-        // config.addAllowedOriginPattern("http://127.0.0.1:*");
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(true); // important
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
