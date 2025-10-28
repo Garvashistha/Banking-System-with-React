@@ -19,8 +19,7 @@ public class AccountServiceImpl implements AccountService {
     private final TransactionService transactionService;
 
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository,
-                              TransactionService transactionService) {
+    public AccountServiceImpl(AccountRepository accountRepository, TransactionService transactionService) {
         this.accountRepository = accountRepository;
         this.transactionService = transactionService;
     }
@@ -70,6 +69,7 @@ public class AccountServiceImpl implements AccountService {
         transaction.setAmount(BigDecimal.valueOf(amount.doubleValue()));
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setStatus("SUCCESS");
+
         transactionService.save(transaction);
     }
 
@@ -92,6 +92,7 @@ public class AccountServiceImpl implements AccountService {
         transaction.setAmount(BigDecimal.valueOf(amount.doubleValue()));
         transaction.setTimestamp(LocalDateTime.now());
         transaction.setStatus("SUCCESS");
+
         transactionService.save(transaction);
     }
 
@@ -99,7 +100,6 @@ public class AccountServiceImpl implements AccountService {
     public void transfer(Long fromAccountId, Long toAccountId, BigDecimal amount) {
         Account fromAccount = accountRepository.findById(fromAccountId)
                 .orElseThrow(() -> new RuntimeException("Sender account not found"));
-
         Account toAccount = accountRepository.findById(toAccountId)
                 .orElseThrow(() -> new RuntimeException("Receiver account not found"));
 
@@ -110,7 +110,6 @@ public class AccountServiceImpl implements AccountService {
         // update balances
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
-
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);
 
