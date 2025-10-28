@@ -45,34 +45,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .authorizeHttpRequests(auth -> auth
-                // ✅ Allow all OPTIONS (for CORS preflight)
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .anyRequest().permitAll() // 🚨 allow absolutely everything
+        )
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
-                // ✅ Public endpoints
-                .requestMatchers(
-                    "/", "/error", "/actuator/**",
-                    "/auth/**", "/api/auth/**",
-                    "/public/**", "/api/chat/**",
-                    "/api/accounts/create" // ✅ Make account creation fully public
-                ).permitAll()
+    return http.build();
+}
 
-                // ✅ Everything else requires auth
-                .anyRequest().authenticated()
-            )
-            // ✅ Disable login & basic auth
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable());
-
-        return http.build();
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
