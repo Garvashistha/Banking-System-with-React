@@ -54,12 +54,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
-                    "/", 
-                    "/auth/**", 
-                    "/api/auth/**", 
-                    "/public/**", 
-                    "/api/chat/**",
-                    "/api/accounts/create" // ✅ allow account creation without JWT
+                    "/", "/error", "/actuator/**",
+                    "/auth/**", "/api/auth/**", "/public/**",
+                    "/api/chat/**", "/api/accounts/create"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
@@ -73,15 +70,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // ✅ Allow only known frontends
         config.setAllowedOrigins(List.of(
             "https://banksystem.zeabur.app",
             "https://banking-system-with-react-7eyy.vercel.app",
             "http://localhost:5173",
             "http://127.0.0.1:5173"
         ));
-
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
