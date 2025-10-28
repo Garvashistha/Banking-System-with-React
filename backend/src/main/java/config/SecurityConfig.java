@@ -52,16 +52,21 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
+                // ✅ Allow all OPTIONS (for CORS preflight)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Public endpoints
+
+                // ✅ Public endpoints
                 .requestMatchers(
                     "/", "/error", "/actuator/**",
-                    "/auth/**", "/api/auth/**", "/public/**",
-                    "/api/chat/**"
+                    "/auth/**", "/api/auth/**",
+                    "/public/**", "/api/chat/**",
+                    "/api/accounts/create" // ✅ Make account creation fully public
                 ).permitAll()
-                // Everything else requires JWT
+
+                // ✅ Everything else requires auth
                 .anyRequest().authenticated()
             )
+            // ✅ Disable login & basic auth
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());
@@ -79,8 +84,8 @@ public class SecurityConfig {
             "http://127.0.0.1:5173"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
