@@ -53,7 +53,14 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/", "/auth/**", "/api/auth/**", "/public/**", "/api/chat/**").permitAll()
+                .requestMatchers(
+                    "/", 
+                    "/auth/**", 
+                    "/api/auth/**", 
+                    "/public/**", 
+                    "/api/chat/**",
+                    "/api/accounts/create" // ✅ allow account creation without JWT
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -66,8 +73,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        
-        // ✅ Must match your frontend URLs exactly
+
+        // ✅ Allow only known frontends
         config.setAllowedOrigins(List.of(
             "https://banksystem.zeabur.app",
             "https://banking-system-with-react-7eyy.vercel.app",
@@ -78,7 +85,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
-        config.setAllowCredentials(true); // important
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
