@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthApiController {
 
     @Autowired
