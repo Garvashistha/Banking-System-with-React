@@ -4,7 +4,7 @@
 // -----------------------------------------------------------
 
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_URL as string) || "http://localhost:8080";
+  (import.meta.env.VITE_API_URL as string) || "banksystem.zeabur.app";
 
 /**
  * Generic API request helper
@@ -153,7 +153,7 @@ export const transactionApi = {
 // PROFILE API
 // -----------------------------------------------------------
 export const profileApi = {
-  getProfile: async () => apiRequest("/profile"),
+  getProfile: async () => apiRequest("/api/profile"),
   updateProfile: async (data: Record<string, any>) =>
     apiRequest("/profile", { method: "PUT", body: data }),
 };
