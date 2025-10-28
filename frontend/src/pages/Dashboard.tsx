@@ -104,16 +104,17 @@ export default function Dashboard() {
     setSubmitting(true);
     try {
       const response = await fetch('https://banksystem.zeabur.app/api/accounts/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          accountype: accountType,
-          initialDeposit: parseFloat(initialDeposit)
-        })
-      });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    accountType: accountType,
+    initialDeposit: parseFloat(initialDeposit)
+  })
+});
+
+
 
       if (response.ok) {
         toast({

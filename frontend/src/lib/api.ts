@@ -1,9 +1,12 @@
 // src/lib/api.ts
 // -----------------------------------------------------------
 // Universal API helper for the React frontend
-// - Uses import.meta.env.VITE_API_URL or defaults to http://localhost:8080
-// - Handles JSON automatically and includes JWT token if present
-// - Groups requests under authApi, customerApi, dashboardApi, transactionApi
+// -----------------------------------------------------------
+// ✅ Handles:
+//  - Base URL via import.meta.env.VITE_API_URL or localhost
+//  - JSON serialization/deserialization
+//  - Automatic JWT token injection
+//  - Unified error handling
 // -----------------------------------------------------------
 
 export const API_BASE_URL =
@@ -20,7 +23,7 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
     "Content-Type": "application/json",
   };
 
-  // ✅ Include JWT in Authorization header if available
+  // ✅ Include JWT token if available
   if (token) {
     defaultHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -31,10 +34,10 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
       ...defaultHeaders,
       ...(options.headers || {}),
     },
-    credentials: "include",
+    credentials: "include", // enables cookies + CORS
   };
 
-  // handle body
+  // ✅ Handle body (FormData / JSON / String)
   if (options.body !== undefined && options.body !== null) {
     if (typeof FormData !== "undefined" && options.body instanceof FormData) {
       (config as any).body = options.body;
@@ -46,24 +49,25 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
     }
   }
 
-  // merge extra fetch options
+  // ✅ Merge leftover fetch options
   const leftover = { ...options };
   delete leftover.body;
   delete leftover.method;
   delete leftover.headers;
   Object.assign(config, leftover);
 
-  // Ensure only one "/api" prefix total
+  // ✅ Ensure no duplicate "/api" prefixes
   const url =
     API_BASE_URL + (endpoint.startsWith("/") ? endpoint : `/${endpoint}`);
 
   const res = await fetch(url, config);
   const text = await res.text();
+
   let payload: any = text;
   try {
     payload = text ? JSON.parse(text) : null;
   } catch {
-    // not JSON, keep as text
+    // not JSON, ignore
   }
 
   if (!res.ok) {
@@ -94,7 +98,6 @@ export const authApi = {
     fullName?: string;
   }) => apiRequest("/api/auth/register", { method: "POST", body: data }),
 
-  // ✅ Updated to send Authorization header with token
   validateToken: async () => {
     const token = localStorage.getItem("banking-token");
     if (!token) throw new Error("No JWT token found");
@@ -122,6 +125,17 @@ export const customerApi = {
 };
 
 // -----------------------------------------------------------
+// ACCOUNT API (🔥 added to fix your 403 error)
+// -----------------------------------------------------------
+export const accountApi = {
+  createAccount: async (data: { accountType: string; initialDeposit: number }) =>
+    apiRequest("/api/accounts/create", { method: "POST", body: data }),
+
+  getAllAccounts: async () => apiRequest("/api/accounts"),
+  getAccountById: async (id: string) => apiRequest(`/api/accounts/${id}`),
+};
+
+// -----------------------------------------------------------
 // DASHBOARD API
 // -----------------------------------------------------------
 export const dashboardApi = {
@@ -146,6 +160,7 @@ export const transactionApi = {
 
   getHistory: async () => apiRequest("/transactions/history"),
 };
+
 // -----------------------------------------------------------
 // PROFILE API
 // -----------------------------------------------------------
@@ -155,13 +170,13 @@ export const profileApi = {
     apiRequest("/api/profile", { method: "PUT", body: data }),
 };
 
-
 // -----------------------------------------------------------
 // Default export (optional convenience)
 // -----------------------------------------------------------
 export default {
   authApi,
   customerApi,
+  accountApi, // ✅ new
   dashboardApi,
   transactionApi,
   profileApi,
