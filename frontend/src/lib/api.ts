@@ -2,19 +2,12 @@
 // -----------------------------------------------------------
 // Universal API helper for the React frontend
 // -----------------------------------------------------------
-// ✅ Handles:
-//  - Base URL via import.meta.env.VITE_API_URL or localhost
-//  - JSON serialization/deserialization
-//  - Automatic JWT token injection
-//  - Unified error handling
-// -----------------------------------------------------------
 
 export const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string) || "http://localhost:8080";
 
 /**
- * Generic API request helper.
- * Automatically stringifies objects, adds token, and handles errors.
+ * Generic API request helper
  */
 async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
   const token = localStorage.getItem("banking-token");
@@ -23,7 +16,6 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
     "Content-Type": "application/json",
   };
 
-  // ✅ Include JWT token if available
   if (token) {
     defaultHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -34,10 +26,9 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
       ...defaultHeaders,
       ...(options.headers || {}),
     },
-    credentials: "include", // enables cookies + CORS
+    credentials: "include",
   };
 
-  // ✅ Handle body (FormData / JSON / String)
   if (options.body !== undefined && options.body !== null) {
     if (typeof FormData !== "undefined" && options.body instanceof FormData) {
       (config as any).body = options.body;
@@ -49,14 +40,13 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
     }
   }
 
-  // ✅ Merge leftover fetch options
   const leftover = { ...options };
   delete leftover.body;
   delete leftover.method;
   delete leftover.headers;
   Object.assign(config, leftover);
 
-  // ✅ Ensure no duplicate "/api" prefixes
+  // ✅ Ensure no duplicate slashes
   const url =
     API_BASE_URL + (endpoint.startsWith("/") ? endpoint : `/${endpoint}`);
 
@@ -67,7 +57,7 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
   try {
     payload = text ? JSON.parse(text) : null;
   } catch {
-    // not JSON, ignore
+    // not JSON
   }
 
   if (!res.ok) {
@@ -87,25 +77,23 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
 // -----------------------------------------------------------
 export const authApi = {
   login: async (data: { username: string; password: string }) =>
-    apiRequest("/api/auth/login", { method: "POST", body: data }),
+    apiRequest("/auth/login", { method: "POST", body: data }),
 
-  logout: async () => apiRequest("/api/auth/logout", { method: "POST" }),
+  logout: async () => apiRequest("/auth/logout", { method: "POST" }),
 
   register: async (data: {
     username: string;
     password: string;
     email?: string;
     fullName?: string;
-  }) => apiRequest("/api/auth/register", { method: "POST", body: data }),
+  }) => apiRequest("/auth/register", { method: "POST", body: data }),
 
   validateToken: async () => {
     const token = localStorage.getItem("banking-token");
     if (!token) throw new Error("No JWT token found");
-    return apiRequest("/api/auth/validate-token", {
+    return apiRequest("/auth/validate-token", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
   },
 };
@@ -125,14 +113,14 @@ export const customerApi = {
 };
 
 // -----------------------------------------------------------
-// ACCOUNT API (🔥 added to fix your 403 error)
+// ACCOUNT API
 // -----------------------------------------------------------
 export const accountApi = {
   createAccount: async (data: { accountType: string; initialDeposit: number }) =>
-    apiRequest("/api/accounts/create", { method: "POST", body: data }),
+    apiRequest("/accounts/create", { method: "POST", body: data }),
 
-  getAllAccounts: async () => apiRequest("/api/accounts"),
-  getAccountById: async (id: string) => apiRequest(`/api/accounts/${id}`),
+  getAllAccounts: async () => apiRequest("/accounts"),
+  getAccountById: async (id: string) => apiRequest(`/accounts/${id}`),
 };
 
 // -----------------------------------------------------------
@@ -165,18 +153,18 @@ export const transactionApi = {
 // PROFILE API
 // -----------------------------------------------------------
 export const profileApi = {
-  getProfile: async () => apiRequest("/api/profile"),
+  getProfile: async () => apiRequest("/profile"),
   updateProfile: async (data: Record<string, any>) =>
-    apiRequest("/api/profile", { method: "PUT", body: data }),
+    apiRequest("/profile", { method: "PUT", body: data }),
 };
 
 // -----------------------------------------------------------
-// Default export (optional convenience)
+// Default export
 // -----------------------------------------------------------
 export default {
   authApi,
   customerApi,
-  accountApi, // ✅ new
+  accountApi,
   dashboardApi,
   transactionApi,
   profileApi,
