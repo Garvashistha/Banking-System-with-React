@@ -2,23 +2,35 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  DollarSign, 
-  ArrowUpRight, 
-  ArrowDownRight, 
+import {
+  DollarSign,
+  ArrowUpRight,
+  ArrowDownRight,
   ArrowRightLeft,
-  TrendingUp,
   Eye,
   EyeOff,
   PlusCircle
 } from 'lucide-react';
 import { useAuth } from '../context/auth-context';
-import { dashboardApi } from '../lib/api';
+import { dashboardApi, accountApi } from '../lib/api';
 import { DashboardData } from '../types/dashboard';
 import { Transaction } from '../types/transaction';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +39,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBalance, setShowBalance] = useState(true);
@@ -42,15 +55,15 @@ export default function Dashboard() {
         if (response.success && response.data) {
           setDashboardData(response.data);
         } else {
-          // Mock data for development
+          // Mock data fallback
           setDashboardData({
             accountNumber: '****-****-****-1234',
-            balance: 15750.00,
+            balance: 15750.0,
             transactions: [
               {
                 id: 1,
                 type: 'DEPOSIT',
-                amount: 2500.00,
+                amount: 2500.0,
                 accountNumber: '****-****-****-1234',
                 timestamp: new Date().toISOString(),
                 description: 'Salary deposit'
@@ -58,7 +71,7 @@ export default function Dashboard() {
               {
                 id: 2,
                 type: 'WITHDRAW',
-                amount: 150.00,
+                amount: 150.0,
                 accountNumber: '****-****-****-1234',
                 timestamp: new Date(Date.now() - 86400000).toISOString(),
                 description: 'ATM withdrawal'
@@ -66,7 +79,7 @@ export default function Dashboard() {
               {
                 id: 3,
                 type: 'TRANSFER',
-                amount: 500.00,
+                amount: 500.0,
                 accountNumber: '****-****-****-1234',
                 timestamp: new Date(Date.now() - 172800000).toISOString(),
                 description: 'Transfer to savings'
@@ -87,62 +100,47 @@ export default function Dashboard() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'INR'
     }).format(amount);
   };
 
+  // ✅ FIXED Create Account handler
   const handleOpenAccount = async () => {
     if (!initialDeposit || parseFloat(initialDeposit) <= 0) {
       toast({
-        title: "Error",
-        description: "Please enter a valid initial deposit amount",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Please enter a valid initial deposit amount',
+        variant: 'destructive'
       });
       return;
     }
 
     setSubmitting(true);
     try {
-      const response = await fetch('https://banksystem.zeabur.app/api/accounts/create', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    accountType: accountType,
-    initialDeposit: parseFloat(initialDeposit)
-  })
-});
+      const response = await accountApi.createAccount({
+        accountType: accountType,
+        initialDeposit: parseFloat(initialDeposit)
+      });
 
-
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Account created successfully!",
-        });
-        setOpenAccountModal(false);
-        setAccountType('SAVINGS');
-        setInitialDeposit('');
-        
-        // Refresh dashboard data
-        const dashboardResponse = await dashboardApi.getDashboardData();
-        if (dashboardResponse.success && dashboardResponse.data) {
-          setDashboardData(dashboardResponse.data);
-        }
-      } else {
-        const error = await response.json();
-        toast({
-          title: "Error",
-          description: error.message || "Failed to create account",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create account. Please try again.",
-        variant: "destructive"
+        title: 'Success',
+        description: 'Account created successfully!'
+      });
+
+      setOpenAccountModal(false);
+      setAccountType('SAVINGS');
+      setInitialDeposit('');
+
+      // Refresh dashboard after success
+      const dashboardResponse = await dashboardApi.getDashboardData();
+      if (dashboardResponse.success && dashboardResponse.data) {
+        setDashboardData(dashboardResponse.data);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create account',
+        variant: 'destructive'
       });
     } finally {
       setSubmitting(false);
@@ -153,7 +151,7 @@ export default function Dashboard() {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
+      year: 'numeric'
     });
   };
 
@@ -212,8 +210,12 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.fullName?.split(' ')[0]}</h1>
-          <p className="text-muted-foreground">Here's an overview of your account</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {user?.fullName?.split(' ')[0]}
+          </h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your account
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Dialog open={openAccountModal} onOpenChange={setOpenAccountModal}>
@@ -256,24 +258,24 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="flex justify-end space-x-2 pt-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setOpenAccountModal(false)}
                     disabled={submitting}
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    onClick={handleOpenAccount}
-                    disabled={submitting}
-                  >
+                  <Button onClick={handleOpenAccount} disabled={submitting}>
                     {submitting ? 'Creating...' : 'Create Account'}
                   </Button>
                 </div>
               </div>
             </DialogContent>
           </Dialog>
-          <Button onClick={() => navigate('/deposit')} className="bg-gradient-success">
+          <Button
+            onClick={() => navigate('/deposit')}
+            className="bg-gradient-success"
+          >
             <ArrowDownRight className="mr-2 h-4 w-4" />
             Deposit
           </Button>
@@ -295,12 +297,18 @@ export default function Dashboard() {
               onClick={() => setShowBalance(!showBalance)}
               className="h-8 w-8 p-0"
             >
-              {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showBalance ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </Button>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold animate-balance">
-              {showBalance ? formatCurrency(dashboardData?.balance || 0) : '••••••'}
+              {showBalance
+                ? formatCurrency(dashboardData?.balance || 0)
+                : '••••••'}
             </div>
             <p className="text-xs text-muted-foreground">
               Account: {dashboardData?.accountNumber}
@@ -308,6 +316,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Other Cards */}
         <Card className="animate-card-hover shadow-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Deposits</CardTitle>
@@ -317,12 +326,17 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-success">
               {formatCurrency(
                 dashboardData?.transactions
-                  ?.filter(t => t.type === 'DEPOSIT')
+                  ?.filter((t) => t.type === 'DEPOSIT')
                   ?.reduce((sum, t) => sum + t.amount, 0) || 0
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {dashboardData?.transactions?.filter(t => t.type === 'DEPOSIT').length || 0} transactions
+              {
+                dashboardData?.transactions?.filter(
+                  (t) => t.type === 'DEPOSIT'
+                ).length || 0
+              }{' '}
+              transactions
             </p>
           </CardContent>
         </Card>
@@ -336,12 +350,17 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-destructive">
               {formatCurrency(
                 dashboardData?.transactions
-                  ?.filter(t => t.type === 'WITHDRAW')
+                  ?.filter((t) => t.type === 'WITHDRAW')
                   ?.reduce((sum, t) => sum + t.amount, 0) || 0
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {dashboardData?.transactions?.filter(t => t.type === 'WITHDRAW').length || 0} transactions
+              {
+                dashboardData?.transactions?.filter(
+                  (t) => t.type === 'WITHDRAW'
+                ).length || 0
+              }{' '}
+              transactions
             </p>
           </CardContent>
         </Card>
@@ -355,12 +374,17 @@ export default function Dashboard() {
             <div className="text-2xl font-bold text-primary">
               {formatCurrency(
                 dashboardData?.transactions
-                  ?.filter(t => t.type === 'TRANSFER')
+                  ?.filter((t) => t.type === 'TRANSFER')
                   ?.reduce((sum, t) => sum + t.amount, 0) || 0
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {dashboardData?.transactions?.filter(t => t.type === 'TRANSFER').length || 0} transactions
+              {
+                dashboardData?.transactions?.filter(
+                  (t) => t.type === 'TRANSFER'
+                ).length || 0
+              }{' '}
+              transactions
             </p>
           </CardContent>
         </Card>
@@ -371,7 +395,9 @@ export default function Dashboard() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Recent Transactions</CardTitle>
-            <p className="text-sm text-muted-foreground">Your latest banking activity</p>
+            <p className="text-sm text-muted-foreground">
+              Your latest banking activity
+            </p>
           </div>
           <Button variant="outline" onClick={() => navigate('/history')}>
             View All
@@ -389,14 +415,20 @@ export default function Dashboard() {
                     {getTransactionIcon(transaction.type)}
                   </div>
                   <div>
-                    <p className="font-medium">{transaction.description || transaction.type}</p>
+                    <p className="font-medium">
+                      {transaction.description || transaction.type}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {formatDate(transaction.timestamp)}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className={`font-semibold ${getTransactionColor(transaction.type)}`}>
+                  <p
+                    className={`font-semibold ${getTransactionColor(
+                      transaction.type
+                    )}`}
+                  >
                     {transaction.type === 'DEPOSIT' ? '+' : '-'}
                     {formatCurrency(transaction.amount)}
                   </p>
