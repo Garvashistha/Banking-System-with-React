@@ -3,7 +3,7 @@
 // -----------------------------------------------------------
 
 export const API_BASE_URL =
-  (import.meta.env.VITE_API_URL as string) || "https://banksystem.zeabur.app/api";
+  (import.meta.env.VITE_API_URL as string) || "https://banksystem.zeabur.app";
 
 /**
  * Generic API request helper
@@ -39,14 +39,7 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
     }
   }
 
-  // ensure no leftover unwanted keys
-  const leftover = { ...options };
-  delete leftover.body;
-  delete leftover.method;
-  delete leftover.headers;
-  Object.assign(config, leftover);
-
-  // ✅ ensure no duplicate slashes
+  // Ensure no duplicate slashes
   const url =
     API_BASE_URL + (endpoint.startsWith("/") ? endpoint : `/${endpoint}`);
 
@@ -77,21 +70,21 @@ async function apiRequest(endpoint: string, options: any = {}): Promise<any> {
 // -----------------------------------------------------------
 export const authApi = {
   login: (data: { username: string; password: string }) =>
-    apiRequest("/auth/login", { method: "POST", body: data }),
+    apiRequest("/api/auth/login", { method: "POST", body: data }),
 
-  logout: () => apiRequest("/auth/logout", { method: "POST" }),
+  logout: () => apiRequest("/api/auth/logout", { method: "POST" }),
 
   register: (data: {
     username: string;
     password: string;
     email?: string;
     fullName?: string;
-  }) => apiRequest("/auth/register", { method: "POST", body: data }),
+  }) => apiRequest("/api/auth/register", { method: "POST", body: data }),
 
   validateToken: () => {
     const token = localStorage.getItem("banking-token");
     if (!token) throw new Error("No JWT token found");
-    return apiRequest("/auth/validate-token", {
+    return apiRequest("/api/auth/validate-token", {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -102,32 +95,32 @@ export const authApi = {
 // CUSTOMER API
 // -----------------------------------------------------------
 export const customerApi = {
-  getAll: () => apiRequest("/customers"),
-  getOne: (id: string) => apiRequest(`/customers/${id}`),
+  getAll: () => apiRequest("/api/customers"),
+  getOne: (id: string) => apiRequest(`/api/customers/${id}`),
   create: (data: Record<string, any>) =>
-    apiRequest("/customers/create", { method: "POST", body: data }),
+    apiRequest("/api/customers/create", { method: "POST", body: data }),
   update: (id: string, data: Record<string, any>) =>
-    apiRequest(`/customers/update/${id}`, { method: "PUT", body: data }),
-  delete: (id: string) => apiRequest(`/customers/delete/${id}`, { method: "DELETE" }),
+    apiRequest(`/api/customers/update/${id}`, { method: "PUT", body: data }),
+  delete: (id: string) =>
+    apiRequest(`/api/customers/delete/${id}`, { method: "DELETE" }),
 };
 
 // -----------------------------------------------------------
 // ACCOUNT API
 // -----------------------------------------------------------
 export const accountApi = {
-  // ✅ critical for “Open Account” button
   createAccount: (data: { accountType: string; initialDeposit: number }) =>
-    apiRequest("/accounts/create", { method: "POST", body: data }),
+    apiRequest("/api/accounts/create", { method: "POST", body: data }),
 
-  getAllAccounts: () => apiRequest("/accounts"),
-  getAccountById: (id: string) => apiRequest(`/accounts/${id}`),
+  getAllAccounts: () => apiRequest("/api/accounts"),
+  getAccountById: (id: string) => apiRequest(`/api/accounts/${id}`),
 };
 
 // -----------------------------------------------------------
 // DASHBOARD API
 // -----------------------------------------------------------
 export const dashboardApi = {
-  getDashboardData: () => apiRequest("/dashboard"),
+  getDashboardData: () => apiRequest("/api/dashboard"),
 };
 
 // -----------------------------------------------------------
@@ -135,28 +128,28 @@ export const dashboardApi = {
 // -----------------------------------------------------------
 export const transactionApi = {
   deposit: (data: { accountNumber: string; amount: number }) =>
-    apiRequest("/transactions/deposit", { method: "POST", body: data }),
+    apiRequest("/api/transactions/deposit", { method: "POST", body: data }),
 
   withdraw: (data: { accountNumber: string; amount: number }) =>
-    apiRequest("/transactions/withdraw", { method: "POST", body: data }),
+    apiRequest("/api/transactions/withdraw", { method: "POST", body: data }),
 
   transfer: (data: {
     fromAccount: string;
     toAccount: string;
     amount: number;
-  }) => apiRequest("/transactions/transfer", { method: "POST", body: data }),
+  }) =>
+    apiRequest("/api/transactions/transfer", { method: "POST", body: data }),
 
-  getHistory: () => apiRequest("/transactions/history"),
+  getHistory: () => apiRequest("/api/transactions/history"),
 };
 
 // -----------------------------------------------------------
 // PROFILE API
 // -----------------------------------------------------------
-// ✅ small fix: removed `/api/profile` (you already have /api in BASE_URL)
 export const profileApi = {
-  getProfile: () => apiRequest("/profile"),
+  getProfile: () => apiRequest("/api/profile"),
   updateProfile: (data: Record<string, any>) =>
-    apiRequest("/profile", { method: "PUT", body: data }),
+    apiRequest("/api/profile", { method: "PUT", body: data }),
 };
 
 // -----------------------------------------------------------
